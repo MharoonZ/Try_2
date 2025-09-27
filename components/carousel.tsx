@@ -2,6 +2,7 @@ import { getProducts } from 'lib/shopify';
 import Link from 'next/link';
 import { GridTileImage } from './grid/tile';
 
+
 export async function Carousel() {
   // Use all products instead of specific collection
   const products = await getProducts({});
