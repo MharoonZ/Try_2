@@ -54,7 +54,7 @@ export async function getAuthorizationUrl(redirectUri: string) {
   
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
-    scope: 'openid email profile https://api.shopify.com/auth/customer.graphql',
+    scope: 'openid email profile',
     response_type: 'code',
     redirect_uri: redirectUri,
     code_challenge: codeChallenge,
