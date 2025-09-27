@@ -80,25 +80,53 @@ export async function exchangeCodeForToken(
   codeVerifier: string,
   redirectUri: string
 ) {
+  console.log('=== Token Exchange Debug ===');
+  console.log('API URL:', API_URL);
+  console.log('Client ID:', CLIENT_ID);
+  console.log('Code length:', code.length);
+  console.log('Code verifier length:', codeVerifier.length);
+  console.log('Redirect URI:', redirectUri);
+  
+  const requestBody = new URLSearchParams({
+    client_id: CLIENT_ID,
+    code: code,
+    code_verifier: codeVerifier,
+    redirect_uri: redirectUri,
+    grant_type: 'authorization_code',
+  });
+  
+  console.log('Request body:', Object.fromEntries(requestBody.entries()));
+  
   const response = await fetch(`${API_URL}/oauth/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      code: code,
-      code_verifier: codeVerifier,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-    }),
+    body: requestBody,
   });
 
+  console.log('Response status:', response.status);
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
   if (!response.ok) {
-    throw new Error('Failed to exchange code for token');
+    const errorText = await response.text();
+    console.error('Token exchange failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorText
+    });
+    throw new Error(`Token exchange failed: ${response.status} ${errorText}`);
   }
 
-  return response.json();
+  const tokenData = await response.json();
+  console.log('Token exchange successful:', {
+    hasAccessToken: !!tokenData.access_token,
+    tokenType: tokenData.token_type,
+    expiresIn: tokenData.expires_in
+  });
+  console.log('============================');
+  
+  return tokenData;
 }
 
 // Get customer data
@@ -232,6 +260,10 @@ export async function requireAuth() {
 
 // Store PKCE parameters temporarily
 export async function storePKCE(codeVerifier: string, state: string) {
+  console.log('=== Storing PKCE ===');
+  console.log('Code verifier length:', codeVerifier.length);
+  console.log('State:', state);
+  
   const cookieStore = await cookies();
   cookieStore.set('pkce_code_verifier', codeVerifier, {
     httpOnly: true,
@@ -245,16 +277,30 @@ export async function storePKCE(codeVerifier: string, state: string) {
     sameSite: 'lax',
     maxAge: 60 * 10, // 10 minutes
   });
+  
+  console.log('PKCE stored successfully');
+  console.log('=======================');
 }
 
 // Get stored PKCE parameters
 export async function getStoredPKCE(): Promise<{ codeVerifier: string; state: string } | null> {
+  console.log('=== Getting Stored PKCE ===');
   const cookieStore = await cookies();
   const codeVerifier = cookieStore.get('pkce_code_verifier')?.value;
   const state = cookieStore.get('oauth_state')?.value;
   
-  if (!codeVerifier || !state) return null;
+  console.log('Code verifier found:', !!codeVerifier);
+  console.log('State found:', !!state);
+  console.log('Code verifier length:', codeVerifier?.length || 0);
+  console.log('State length:', state?.length || 0);
   
+  if (!codeVerifier || !state) {
+    console.log('PKCE not found - missing parameters');
+    return null;
+  }
+  
+  console.log('PKCE retrieved successfully');
+  console.log('==========================');
   return { codeVerifier, state };
 }
 
