@@ -372,10 +372,6 @@ export async function getCollections(): Promise<Collection[]> {
   }
 
   try {
-    'use cache';
-    cacheTag(TAGS.collections);
-    cacheLife('days');
-
     const res = await shopifyFetch<ShopifyCollectionsOperation>({
       query: getCollectionsQuery
     });
@@ -426,10 +422,6 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   }
 
   try {
-    'use cache';
-    cacheTag(TAGS.collections);
-    cacheLife('days');
-
     const res = await shopifyFetch<ShopifyMenuOperation>({
       query: getMenuQuery,
       variables: {
@@ -517,10 +509,6 @@ export async function getProducts({
   }
 
   try {
-    'use cache';
-    cacheTag(TAGS.products);
-    cacheLife('days');
-
     const res = await shopifyFetch<ShopifyProductsOperation>({
       query: getProductsQuery,
       variables: {
