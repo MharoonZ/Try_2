@@ -19,6 +19,12 @@ export async function GET(request: NextRequest) {
   console.log('================================');
 
   // Handle OAuth callback
+  console.log('=== Checking OAuth Callback Conditions ===');
+  console.log('Code present:', !!code);
+  console.log('State present:', !!state);
+  console.log('Code value:', code);
+  console.log('State value:', state);
+  
   if (code && state) {
     console.log('=== Processing OAuth Callback ===');
     try {
@@ -84,6 +90,9 @@ export async function GET(request: NextRequest) {
     await clearPKCE();
     return NextResponse.redirect(new URL(`/login?error=${error}`, request.url));
   }
+
+  // If we reach here without code and state, something went wrong
+  console.log('=== No Code/State - Starting OAuth Flow ===');
 
   // Start OAuth flow
   console.log('=== Starting OAuth Flow ===');
