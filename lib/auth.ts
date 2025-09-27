@@ -52,9 +52,12 @@ export async function generatePKCE() {
 export async function getAuthorizationUrl(redirectUri: string) {
   const { codeChallenge, state } = await generatePKCE();
   
+  const scope = 'openid';
+  console.log('OAuth Debug - Scope being used:', scope);
+  
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
-    scope: 'openid email profile',
+    scope: scope,
     response_type: 'code',
     redirect_uri: redirectUri,
     code_challenge: codeChallenge,
@@ -62,8 +65,11 @@ export async function getAuthorizationUrl(redirectUri: string) {
     state: state
   });
 
+  const url = `${API_URL}/oauth/authorize?${params.toString()}`;
+  console.log('OAuth Debug - Generated URL:', url);
+
   return {
-    url: `${API_URL}/oauth/authorize?${params.toString()}`,
+    url,
     state
   };
 }

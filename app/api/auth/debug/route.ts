@@ -16,7 +16,7 @@ export async function GET() {
 
   // Construct OAuth URL for testing
   const oauthUrl = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_URL && process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID
-    ? `${process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_URL}/oauth/authorize?client_id=${process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID}&response_type=code&scope=openid%20email%20profile&redirect_uri=${encodeURIComponent(redirectUri)}&state=test`
+    ? `${process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_URL}/oauth/authorize?client_id=${process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID}&response_type=code&scope=openid&redirect_uri=${encodeURIComponent(redirectUri)}&state=test`
     : 'Cannot construct - missing environment variables';
 
   const checks = {
