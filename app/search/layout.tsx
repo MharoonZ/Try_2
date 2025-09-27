@@ -5,6 +5,7 @@ import { sorting } from 'lib/constants';
 import ChildrenWrapper from './children-wrapper';
 import { Suspense } from 'react';
 
+
 export default function SearchLayout({
   children
 }: {
