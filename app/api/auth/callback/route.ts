@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
     code: code ? 'present' : 'missing',
     state: state ? 'present' : 'missing',
     error: error || 'none',
-    url: request.url
+    url: request.url,
+    searchParams: Object.fromEntries(searchParams.entries())
   });
 
   // Handle OAuth callback
