@@ -1,5 +1,6 @@
 import CartModal from 'components/cart/modal';
 import LogoSquare from 'components/logo-square';
+import { isAuthenticated } from 'lib/auth';
 import { getMenu } from 'lib/shopify';
 import { Menu } from 'lib/shopify/types';
 import Link from 'next/link';
@@ -11,6 +12,7 @@ const { SITE_NAME } = process.env;
 
 export async function Navbar() {
   const menu = await getMenu('next-js-frontend-header-menu');
+  const authenticated = await isAuthenticated();
 
   return (
     <nav className="relative flex items-center justify-between p-4 lg:px-6">
@@ -52,7 +54,22 @@ export async function Navbar() {
             <Search />
           </Suspense>
         </div>
-        <div className="flex justify-end md:w-1/3">
+        <div className="flex justify-end md:w-1/3 items-center space-x-4">
+          {authenticated ? (
+            <Link
+              href="/account"
+              className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-neutral-300"
+            >
+              Account
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-neutral-300"
+            >
+              Sign In
+            </Link>
+          )}
           <CartModal />
         </div>
       </div>
