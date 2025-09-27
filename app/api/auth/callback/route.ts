@@ -7,6 +7,14 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get('state');
   const error = searchParams.get('error');
 
+  // Debug logging
+  console.log('OAuth Callback Debug:', {
+    code: code ? 'present' : 'missing',
+    state: state ? 'present' : 'missing',
+    error: error || 'none',
+    url: request.url
+  });
+
   // Handle OAuth callback
   if (code && state) {
     try {
@@ -15,7 +23,13 @@ export async function GET(request: NextRequest) {
         throw new Error('Invalid state parameter');
       }
 
-      const redirectUri = `${process.env.VERCEL_URL || 'http://localhost:3000'}/api/auth/callback`;
+      // Fix: Ensure redirect URI has proper protocol
+      const baseUrl = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}` 
+        : 'http://localhost:3000';
+      const redirectUri = `${baseUrl}/api/auth/callback`;
+      
+      console.log('Exchanging code for token with redirect URI:', redirectUri);
       
       const tokenData = await exchangeCodeForToken(
         code,
@@ -26,6 +40,7 @@ export async function GET(request: NextRequest) {
       await setAccessToken(tokenData.access_token);
       await clearPKCE();
 
+      console.log('Authentication successful, redirecting to account');
       return NextResponse.redirect(new URL('/account', request.url));
     } catch (error) {
       console.error('Auth callback error:', error);
@@ -36,18 +51,27 @@ export async function GET(request: NextRequest) {
 
   // Handle errors
   if (error) {
+    console.error('OAuth error:', error);
     await clearPKCE();
     return NextResponse.redirect(new URL(`/login?error=${error}`, request.url));
   }
 
   // Start OAuth flow
-  const redirectUri = `${process.env.VERCEL_URL || 'http://localhost:3000'}/api/auth/callback`;
+  // Fix: Ensure redirect URI has proper protocol
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : 'http://localhost:3000';
+  const redirectUri = `${baseUrl}/api/auth/callback`;
+  
+  console.log('Starting OAuth flow with redirect URI:', redirectUri);
+  
   const { url, state: authState } = await getAuthorizationUrl(redirectUri);
 
   // Store PKCE parameters
   const { codeVerifier } = await generatePKCE();
   await storePKCE(codeVerifier, authState);
 
+  console.log('Redirecting to Shopify OAuth:', url);
   return NextResponse.redirect(url);
 }
 
