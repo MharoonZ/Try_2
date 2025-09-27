@@ -11,8 +11,22 @@ import Search, { SearchSkeleton } from './search';
 const { SITE_NAME } = process.env;
 
 export async function Navbar() {
-  const menu = await getMenu('next-js-frontend-header-menu');
-  const authenticated = await isAuthenticated();
+  let menu: Menu[] = [];
+  let authenticated = false;
+
+  try {
+    menu = await getMenu('next-js-frontend-header-menu');
+  } catch (error) {
+    console.warn('Failed to fetch menu:', error);
+    // Continue with empty menu
+  }
+
+  try {
+    authenticated = await isAuthenticated();
+  } catch (error) {
+    console.warn('Failed to check authentication:', error);
+    // Continue with unauthenticated state
+  }
 
   return (
     <nav className="relative flex items-center justify-between p-4 lg:px-6">

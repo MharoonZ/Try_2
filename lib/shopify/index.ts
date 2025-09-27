@@ -6,9 +6,9 @@ import {
 import { isShopifyError } from 'lib/type-guards';
 import { ensureStartsWith } from 'lib/utils';
 import {
-  revalidateTag,
+  unstable_cacheLife as cacheLife,
   unstable_cacheTag as cacheTag,
-  unstable_cacheLife as cacheLife
+  revalidateTag
 } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -62,7 +62,12 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://')
   : '';
 const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
-const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+// During build time, these might not be available
+if (!key && process.env.NODE_ENV === 'production') {
+  console.warn('SHOPIFY_STOREFRONT_ACCESS_TOKEN not found during build');
+}
 
 type ExtractVariables<T> = T extends { variables: object }
   ? T['variables']
@@ -77,6 +82,10 @@ export async function shopifyFetch<T>({
   query: string;
   variables?: ExtractVariables<T>;
 }): Promise<{ status: number; body: T } | never> {
+  if (!key) {
+    throw new Error('SHOPIFY_STOREFRONT_ACCESS_TOKEN is not configured');
+  }
+
   try {
     const result = await fetch(endpoint, {
       method: 'POST',
